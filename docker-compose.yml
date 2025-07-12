@@ -69,7 +69,7 @@ services:
 
    # Основной Telegram бот
    bot:
-      image: stepaxvii/bot-pushups:latest
+      image: stepaxvii/admin-panel-notifications:latest
       restart: always
       env_file: .env
       depends_on:

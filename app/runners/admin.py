@@ -13,6 +13,7 @@ import subprocess
 import sys
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
 from starlette_admin.contrib.sqla import Admin, ModelView
 from starlette_admin import action
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -354,6 +355,11 @@ class NotificationView(ModelView):
 
 admin.add_view(NotificationView(Notification))
 admin.mount_to(app)
+
+# Монтирование статических файлов Starlette Admin
+import starlette_admin
+static_path = os.path.join(os.path.dirname(starlette_admin.__file__), "statics")
+app.mount("/statics", StaticFiles(directory=static_path), name="statics")
 
 
 if __name__ == "__main__":
