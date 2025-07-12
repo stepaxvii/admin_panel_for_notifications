@@ -9,7 +9,7 @@
 - **Web Framework**: FastAPI 0.115.12+ с асинхронной архитектурой
 - **Database**: PostgreSQL 16 с SQLAlchemy 2.0.29+ и Alembic для миграций
 - **Caching**: Redis 7+ для кэширования и управления сессиями
-- **Admin Panel**: Starlette Admin 0.15.1+ для управления уведомлениями
+- **Admin Panel**: Starlette Admin 0.15.1+ для управления уведомлениями и пользователями
 - **Logging**: Централизованное логирование с Elasticsearch 8.11.0 и Kibana
 - **Containerization**: Docker Compose для полной контейнеризации
 
@@ -36,13 +36,16 @@
 - Повторная отправка неудачных уведомлений
 - Статистика отправки и ошибок
 - API для управления уведомлениями
+- **Автоматическая блокировка пользователей**, которые заблокировали бота
 
 ### Админ-панель
 - Веб-интерфейс для создания уведомлений
-- Просмотр статистики и статусов
-- Управление пользователями бота
+- **Просмотр списка пользователей бота**
+- **Отображение статуса пользователей (активные/заблокированные)**
+- **Поиск пользователей по имени, языку и статусу**
 - CRUD операции с уведомлениями
 - Предпросмотр уведомлений перед отправкой
+- **Автоматическое определение заблокированных пользователей**
 
 ### Мониторинг и логирование
 - Структурированное JSON логирование
@@ -126,6 +129,60 @@ EOF
 docker-compose up -d
 ```
 
+### Настройка Nginx для админ-панели
+Для корректной работы админ-панели необходимо настроить Nginx для проксирования API запросов:
+
+```nginx
+# Основной сервер
+server {
+    listen 80;
+    server_name your-domain.com;
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name your-domain.com;
+
+    # SSL конфигурация
+    ssl_certificate /path/to/cert.pem;
+    ssl_certificate_key /path/to/key.pem;
+
+    # Telegram Bot API
+    location /api {
+        proxy_pass http://localhost:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+    }
+
+    # Admin Panel API (должен быть перед общим /api)
+    location ~ ^/api/(user|notification) {
+        proxy_pass http://localhost:9000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+    }
+
+    # Admin Panel (все остальные запросы)
+    location / {
+        proxy_pass http://localhost:9000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+    }
+}
+```
+
 ### Переменные окружения
 ```env
 # Telegram Bot
@@ -173,10 +230,16 @@ aiogram_bot_template/
 ├── app/                    # Основной код приложения
 │   ├── endpoints/         # API endpoints (FastAPI)
 │   ├── models/           # Модели данных (SQLAlchemy, Pydantic)
+│   │   ├── sql/         # SQLAlchemy модели
+│   │   │   ├── user.py  # Модель пользователя
+│   │   │   └── notification.py # Модель уведомлений
+│   │   └── dto/         # Pydantic DTO модели
 │   ├── services/         # Бизнес-логика и сервисы
 │   ├── telegram/         # Telegram бот (Aiogram)
 │   ├── factory/          # Фабрики для создания компонентов
 │   ├── runners/          # Запуск приложений
+│   │   ├── admin.py     # Админ-панель
+│   │   └── app.py       # Основное приложение
 │   └── utils/            # Утилиты и хелперы
 ├── migrations/           # Alembic миграции
 ├── assets/              # Локализация и статические файлы
@@ -209,10 +272,44 @@ GET /api/notifications/recent?limit=10
 POST /api/notifications/retry/{notification_id}
 ```
 
+### Админ-панель API
+```http
+GET /api/user
+GET /api/notification
+```
+
 ### Health Check
 ```http
 GET /health
 ```
+
+## Админ-панель
+
+### Функции админ-панели
+- **Управление уведомлениями**:
+  - Создание новых уведомлений
+  - Просмотр списка уведомлений
+  - Отправка уведомлений всем пользователям
+  - Предпросмотр уведомлений
+  - Отслеживание статуса отправки
+
+- **Управление пользователями**:
+  - Просмотр списка всех пользователей бота
+  - Отображение статуса пользователей (активные/заблокированные)
+  - Поиск пользователей по имени, языку и статусу
+  - Автоматическое определение заблокированных пользователей
+
+### Автоматическая блокировка пользователей
+При отправке уведомлений система автоматически:
+- Определяет пользователей, которые заблокировали бота
+- Обновляет их статус на "blocked" в базе данных
+- Исключает их из будущих рассылок
+- Логирует информацию о заблокированных пользователях
+
+### Доступ к админ-панели
+- URL: `https://your-domain.com/`
+- Порт: 9000 (внутренний)
+- Аутентификация: отключена (для продакшена рекомендуется настроить)
 
 ## Разработка
 
@@ -278,6 +375,9 @@ message: "slow_query"
 
 // Уведомления
 message: "notification_sent"
+
+// Заблокированные пользователи
+message: "заблокирован"
 ```
 
 ## Продакшен развертывание
@@ -288,12 +388,12 @@ message: "notification_sent"
 - Настройка бэкапов Elasticsearch
 - Мониторинг через Kibana алерты
 - Логирование в отдельный Elasticsearch кластер
+- **Настройка аутентификации для админ-панели**
 
 ### Масштабирование
 ```bash
 # Горизонтальное масштабирование ботов
 docker-compose up -d --scale bot=3
-
 ```
 
 ### Мониторинг производительности
@@ -301,3 +401,46 @@ docker-compose up -d --scale bot=3
 - Мониторинг использования памяти и CPU
 - Алерты на критические ошибки
 - Дашборды для бизнес-метрик
+- **Мониторинг количества заблокированных пользователей**
+
+## Устранение неполадок
+
+### Проблемы с админ-панелью
+1. **Данные не загружаются**: Проверьте конфигурацию Nginx для `/api/user` и `/api/notification`
+2. **Ошибки 404**: Убедитесь, что API endpoints проксируются на порт 9000
+3. **Проблемы с подключением к БД**: Проверьте переменные окружения POSTGRES_*
+
+### Проблемы с уведомлениями
+1. **Пользователи не получают уведомления**: Проверьте логи на наличие заблокированных пользователей
+2. **Ошибки отправки**: Проверьте токен бота и права доступа
+
+### Полезные команды для диагностики
+```bash
+# Проверка статуса контейнеров
+docker-compose ps
+
+# Просмотр логов админки
+docker-compose logs admin
+
+# Проверка подключения к БД
+docker-compose exec admin python -c "
+import asyncio
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.future import select
+from app.models.sql.user import User
+
+async def test_db():
+    engine = create_async_engine('postgresql+asyncpg://user:pass@postgres:5432/db')
+    async with engine.begin() as conn:
+        result = await conn.execute(select(User))
+        users = result.fetchall()
+        print(f'Found {len(users)} users')
+    await engine.dispose()
+
+asyncio.run(test_db())
+"
+
+# Проверка API endpoints
+curl "https://your-domain.com/api/user"
+curl "https://your-domain.com/api/notification"
+```
