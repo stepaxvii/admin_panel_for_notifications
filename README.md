@@ -76,11 +76,52 @@
 git clone <repository-url>
 cd aiogram_bot_template
 
-cp docker-compose.example.yml docker-compose.yml
-cp .env.example .env
+# Создание .env файла с настройками для вашего домена
+cat > .env << EOF
+# Telegram Bot Configuration
+TELEGRAM_BOT_TOKEN=your_bot_token_here
+TELEGRAM_USE_WEBHOOK=true
+TELEGRAM_WEBHOOK_PATH=/webhook
+TELEGRAM_WEBHOOK_SECRET=your_webhook_secret_here
+TELEGRAM_DROP_PENDING_UPDATES=true
+TELEGRAM_RESET_WEBHOOK=false
+
+# Server Configuration
+SERVER_HOST=0.0.0.0
+SERVER_PORT=8000
+SERVER_URL=https://your-domain.com
+
+# Admin Panel Configuration
+ADMIN_PORT=9000
+
+# Database Configuration
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_USER=bot_user
+POSTGRES_PASSWORD=secure_password_here
+POSTGRES_DB=bot_db
+POSTGRES_DATA=/var/lib/postgresql/data
+
+# Redis Configuration
+REDIS_HOST=redis
+REDIS_PORT=6379
+REDIS_PASSWORD=redis_password_here
+REDIS_DATA=/data
+
+# Environment
+ENVIRONMENT=docker
+
+# Logging
+LOG_LEVEL=INFO
+LOG_FILE=logs/bot.log
+EOF
 
 # Настройка переменных окружения
-# Отредактируйте .env файл
+# Отредактируйте .env файл, заменив:
+# - your_bot_token_here на ваш токен бота
+# - your_webhook_secret_here на секретный ключ для webhook
+# - secure_password_here на безопасный пароль для БД
+# - redis_password_here на пароль для Redis
 
 docker-compose up -d
 ```
@@ -89,24 +130,36 @@ docker-compose up -d
 ```env
 # Telegram Bot
 TELEGRAM_BOT_TOKEN=your_bot_token
-TELEGRAM_WEBHOOK_URL=https://your-domain.com/webhook
+TELEGRAM_USE_WEBHOOK=true
+TELEGRAM_WEBHOOK_PATH=/webhook
+TELEGRAM_WEBHOOK_SECRET=your_webhook_secret_here
+TELEGRAM_DROP_PENDING_UPDATES=true
+TELEGRAM_RESET_WEBHOOK=false
 
-# Database
+# Server Configuration
+SERVER_HOST=0.0.0.0
+SERVER_PORT=8000
+SERVER_URL=https://your-domain.com
+
+# Admin Panel Configuration
+ADMIN_PORT=9000
+
+# Database Configuration
 POSTGRES_HOST=postgres
 POSTGRES_PORT=5432
 POSTGRES_USER=bot_user
-POSTGRES_PASSWORD=secure_password
+POSTGRES_PASSWORD=secure_password_here
 POSTGRES_DB=bot_db
+POSTGRES_DATA=/var/lib/postgresql/data
 
-# Redis
+# Redis Configuration
 REDIS_HOST=redis
 REDIS_PORT=6379
-REDIS_PASSWORD=redis_password
+REDIS_PASSWORD=redis_password_here
+REDIS_DATA=/data
 
-# Server
-SERVER_HOST=0.0.0.0
-SERVER_PORT=8000
-ADMIN_PORT=9000
+# Environment
+ENVIRONMENT=docker
 
 # Logging
 LOG_LEVEL=INFO
@@ -241,8 +294,6 @@ message: "notification_sent"
 # Горизонтальное масштабирование ботов
 docker-compose up -d --scale bot=3
 
-# Отдельный Elasticsearch кластер
-# Настройте внешний Elasticsearch в docker-compose.override.yml
 ```
 
 ### Мониторинг производительности
