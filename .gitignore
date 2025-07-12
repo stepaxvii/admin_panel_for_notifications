@@ -131,3 +131,6 @@ dmypy.json
 # Logs
 logs/
 *.log
+
+# Environment files
+evn.txt
