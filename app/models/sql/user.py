@@ -19,6 +19,7 @@ class User(Base, TimestampMixin):
     language: Mapped[str] = mapped_column(String(length=2))
     language_code: Mapped[Optional[str]] = mapped_column()
     blocked_at: Mapped[Optional[datetime]] = mapped_column()
+    status: Mapped[str] = mapped_column(String(length=20), default="active")
 
     def dto(self) -> UserDto:
         return UserDto.model_validate(self)

@@ -28,10 +28,11 @@ class UserMiddleware(EventTypedMiddleware):
             return await handler(event, data)
 
         user_service: UserService = data["user_service"]
-        user: Optional[UserDto] = await user_service.get(user_id=aiogram_user.id)
-        if user is None:
-            i18n: I18nMiddleware = data["i18n_middleware"]
-            user = await user_service.create(aiogram_user=aiogram_user, i18n_core=i18n.core)
+        i18n: I18nMiddleware = data["i18n_middleware"]
+        user, was_created = await user_service.get_or_create(aiogram_user=aiogram_user, i18n_core=i18n.core)
+        
+        # Логируем только если пользователь был создан
+        if was_created:
             logger.info(
                 "New user in database: %s (%d)",
                 aiogram_user.full_name,

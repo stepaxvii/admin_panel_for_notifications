@@ -1,22 +1,40 @@
-# Builder image
-FROM python:3.12-slim AS builder
+FROM python:3.12-slim
 
-ENV PATH "/app/scripts:${PATH}"
-ENV PYTHONPATH "${PYTHONPATH}:/app"
-ENV PYTHONUNBUFFERED=1 PIP_DISABLE_PIP_VERSION_CHECK=1
-ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
+# Установка системных зависимостей
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
 
+# Обновление pip и setuptools для поддержки pyproject.toml
+RUN pip install --upgrade pip setuptools
+
+# Создание пользователя
+RUN useradd --create-home --shell /bin/bash app
+
+# Установка рабочей директории
 WORKDIR /app
+
+# Копирование файлов проекта
 ADD . /app
 
-# Install project dependencies
-COPY --from=ghcr.io/astral-sh/uv:0.5.7 /uv /uvx /bin/
-RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --no-install-project --no-dev
+# Копирование скрипта запуска админки
+COPY scripts/start-admin.sh /app/scripts/start-admin.sh
+RUN chmod +x /app/scripts/start-admin.sh
 
-# Final image
-FROM builder AS final
-COPY --from=builder --chown=app:app /app /app
-ENV PATH="/app/.venv/bin:$PATH"
-RUN chmod +x scripts/*
+# Установка зависимостей проекта из requirements.txt
+RUN pip install -r requirements.txt
+
+# Диагностика: вывод установленных пакетов
+RUN pip list
+
+# Смена владельца файлов
+RUN chown -R app:app /app
+
+# Переключение на пользователя app
+USER app
+
+# Открытие порта
+EXPOSE 8080
+
+# Команда по умолчанию
+CMD ["python", "-m", "app"]

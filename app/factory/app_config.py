@@ -1,3 +1,9 @@
+"""
+Фабрика для создания конфигурации приложения.
+
+Создает и настраивает все компоненты конфигурации из переменных окружения.
+"""
+
 from __future__ import annotations
 
 from app.models.config.env import (
@@ -11,8 +17,8 @@ from app.models.config.env import (
 )
 
 
-# noinspection PyArgumentList
 def create_app_config() -> AppConfig:
+    """Создает полную конфигурацию приложения из переменных окружения."""
     return AppConfig(
         telegram=TelegramConfig(),
         postgres=PostgresConfig(),

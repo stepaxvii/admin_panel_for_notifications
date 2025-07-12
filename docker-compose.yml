@@ -1,0 +1,98 @@
+# Docker Compose конфигурация для Telegram бота
+# Включает Redis, PostgreSQL, бота, админ-панель и Elasticsearch для логов
+
+services:
+   # Redis для кэширования и сессий
+   redis:
+      image: redis:7-alpine
+      restart: always
+      env_file: .env
+      ports:
+         - "${REDIS_PORT}:6379"
+      expose:
+         - "${REDIS_PORT}"
+      volumes:
+         - redis-data:${REDIS_DATA}
+      command: [ "--requirepass", "${REDIS_PASSWORD}" ]
+
+   # PostgreSQL для хранения данных
+   postgres:
+      image: postgres:16-alpine
+      restart: always
+      env_file: .env
+      environment:
+         POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+         POSTGRES_USER: ${POSTGRES_USER}
+         POSTGRES_DB: ${POSTGRES_DB}
+         PGDATA: ${POSTGRES_DATA}
+      ports:
+         - "${POSTGRES_PORT}:5432"
+      expose:
+         - "${POSTGRES_PORT}"
+      volumes:
+         - postgres-data:${POSTGRES_DATA}
+
+   # Elasticsearch для централизованного логирования
+   elasticsearch:
+      image: elasticsearch:8.11.0
+      restart: always
+      environment:
+         - discovery.type=single-node
+         - xpack.security.enabled=false
+         - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      ports:
+         - "9200:9200"
+      volumes:
+         - elasticsearch-data:/usr/share/elasticsearch/data
+
+   # Kibana для визуализации логов
+   kibana:
+      image: kibana:8.11.0
+      restart: always
+      environment:
+         - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      ports:
+         - "5601:5601"
+      depends_on:
+         - elasticsearch
+
+   # Filebeat для сбора логов
+   filebeat:
+      build:
+        context: ./docker/filebeat
+      restart: always
+      volumes:
+         - ./logs:/var/log/app:ro
+      depends_on:
+         - elasticsearch
+      command: filebeat -e
+
+   # Основной Telegram бот
+   bot:
+      build: .
+      restart: always
+      env_file: .env
+      depends_on:
+         - redis
+         - postgres
+      ports:
+         - "${SERVER_PORT}:${SERVER_PORT}"
+      command: ["python", "-m", "app"]
+
+   # Админ-панель для управления уведомлениями
+   admin:
+      build: .
+      restart: always
+      env_file: .env
+      depends_on:
+         - redis
+         - postgres
+      ports:
+         - "${ADMIN_PORT}:9000"
+      command: ["/app/scripts/start-admin.sh"]
+
+# Постоянные тома для данных
+volumes:
+   redis-data:
+   postgres-data:
+   elasticsearch-data:

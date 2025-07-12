@@ -14,6 +14,7 @@ class UserDto(ActiveRecordModel):
     language_code: Optional[str] = None
     bot_blocked: bool = False
     blocked_at: Optional[datetime] = None
+    status: str = "active"
 
     @property
     def url(self) -> str:

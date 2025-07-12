@@ -1,3 +1,9 @@
+"""
+Базовая модель SQLAlchemy для всех таблиц.
+
+Определяет общие настройки и типы данных для всех моделей.
+"""
+
 from datetime import datetime
 
 from sqlalchemy import BigInteger, DateTime, Integer, SmallInteger, String
@@ -8,6 +14,8 @@ from app.utils.custom_types import DictStrAny, Int16, Int32, Int64
 
 
 class Base(DeclarativeBase):
+    """Базовая модель для всех таблиц базы данных."""
+    
     registry = registry(
         type_annotation_map={
             Int16: SmallInteger(),

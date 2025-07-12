@@ -1,8 +1,6 @@
-
 messages-greeting =
     👋 Hello, { $name }!
 
-    💬 Zakyn meny na dep bud' laska.
+    Welcome to our notification bot! You will receive important updates here.
 
-buttons-deposit = 💳 Depnut'
-buttons-back = 🔙 Back
+buttons-back = 🔙 Back 

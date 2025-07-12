@@ -1,26 +1,23 @@
+"""
+Утилиты для работы с YAML файлами.
+
+Предоставляет функции для загрузки и обработки YAML конфигураций.
+"""
+
 from pathlib import Path
+from typing import Any
 
-from pydantic_settings import (
-    BaseSettings,
-    PydanticBaseSettingsSource,
-    YamlConfigSettingsSource,
-)
+import yaml
 
-from app.const import ASSETS_SOURCE_DIR
+from app.models.base import PydanticModel
 
 
-class YAMLSettings(BaseSettings):
+class YAMLSettings(PydanticModel):
+    """Базовый класс для настроек из YAML файлов."""
+
     @classmethod
-    def settings_customise_sources(
-        cls,
-        settings_cls: type[BaseSettings],
-        init_settings: PydanticBaseSettingsSource,
-        env_settings: PydanticBaseSettingsSource,
-        dotenv_settings: PydanticBaseSettingsSource,
-        file_secret_settings: PydanticBaseSettingsSource,
-    ) -> tuple[PydanticBaseSettingsSource, ...]:
-        return (YamlConfigSettingsSource(settings_cls),)
-
-
-def find_assets_sources() -> list[Path | str]:
-    return list(ASSETS_SOURCE_DIR.rglob("*.yml"))
+    def from_yaml(cls, yaml_file: str | Path) -> "YAMLSettings":
+        """Загрузить настройки из YAML файла."""
+        with open(yaml_file, "r", encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+        return cls(**data)

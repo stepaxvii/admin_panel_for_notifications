@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from aiogram import Dispatcher
 from aiogram.fsm.storage.base import DefaultKeyBuilder
 from aiogram.fsm.storage.redis import RedisStorage
@@ -12,10 +14,13 @@ from app.factory.redis import create_redis
 from app.factory.services import create_services
 from app.factory.session_pool import create_session_pool
 from app.factory.telegram.i18n import create_i18n_middleware
-from app.models.config import AppConfig, Assets
-from app.telegram.handlers import admin, extra, main
-from app.telegram.middlewares import MessageHelperMiddleware, UserMiddleware
+from app.telegram.handlers import extra, main
+from app.telegram.middlewares.message_helper import MessageHelperMiddleware
+from app.telegram.middlewares.user import UserMiddleware
 from app.utils import mjson
+
+if TYPE_CHECKING:
+    from app.models.config import AppConfig
 
 
 def create_dispatcher(config: AppConfig) -> Dispatcher:
@@ -36,7 +41,6 @@ def create_dispatcher(config: AppConfig) -> Dispatcher:
             json_dumps=mjson.encode,
         ),
         config=config,
-        assets=Assets(),
         session_pool=session_pool,
         redis=redis,
         **create_services(
@@ -46,9 +50,9 @@ def create_dispatcher(config: AppConfig) -> Dispatcher:
         ),
     )
 
-    dispatcher.include_routers(admin.router, main.router, extra.router)
-    dispatcher.update.outer_middleware(UserMiddleware())
+    dispatcher.include_routers(main.router, extra.router)
     i18n_middleware.setup(dispatcher=dispatcher)
+    dispatcher.update.outer_middleware(UserMiddleware())
     dispatcher.update.outer_middleware(MessageHelperMiddleware())
     dispatcher.callback_query.middleware(CallbackAnswerMiddleware())
 
