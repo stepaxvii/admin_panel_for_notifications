@@ -3,10 +3,12 @@ FROM python:3.12-slim
 # Установка системных зависимостей
 RUN apt-get update && apt-get install -y \
     gcc \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Обновление pip и setuptools для поддержки pyproject.toml
-RUN pip install --upgrade pip setuptools
+# Установка uv
+RUN pip install --upgrade pip && \
+    pip install uv
 
 # Создание пользователя
 RUN useradd --create-home --shell /bin/bash app
@@ -15,17 +17,13 @@ RUN useradd --create-home --shell /bin/bash app
 WORKDIR /app
 
 # Копирование файлов проекта
-ADD . /app
+COPY pyproject.toml .
 
-# Копирование скрипта запуска админки
-COPY scripts/start-admin.sh /app/scripts/start-admin.sh
-RUN chmod +x /app/scripts/start-admin.sh
+# Установка зависимостей проекта через uv (с флагом --system)
+RUN uv pip install --system .
 
-# Установка зависимостей проекта из requirements.txt
-RUN pip install -r requirements.txt
-
-# Диагностика: вывод установленных пакетов
-RUN pip list
+# Копирование остальных файлов
+COPY . .
 
 # Смена владельца файлов
 RUN chown -R app:app /app

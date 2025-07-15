@@ -26,7 +26,7 @@ services:
          POSTGRES_DB: ${POSTGRES_DB}
          PGDATA: ${POSTGRES_DATA}
       ports:
-         - "5433:5432"
+         - "5434:5432"
       expose:
          - "5432"
       volumes:
@@ -69,7 +69,7 @@ services:
 
    # Основной Telegram бот
    bot:
-      image: stepaxvii/admin-panel-notifications:latest
+      image: stepaxvii/admin-panel:latest
       restart: always
       env_file: .env
       depends_on:
@@ -81,7 +81,7 @@ services:
 
    # Админ-панель для управления уведомлениями
    admin:
-      image: stepaxvii/admin-panel-notifications:latest
+      image: stepaxvii/admin-panel:latest
       restart: always
       env_file: .env
       depends_on:
