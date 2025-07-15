@@ -11,7 +11,7 @@ from fastapi.testclient import TestClient
 os.environ.update({
     "TELEGRAM_BOT_TOKEN": "test_token",
     "POSTGRES_HOST": "localhost",
-    "POSTGRES_PORT": "5433",
+    "POSTGRES_PORT": "5434",
     "POSTGRES_USER": "test_user",
     "POSTGRES_PASSWORD": "test_password",
     "POSTGRES_DB": "test_db",
