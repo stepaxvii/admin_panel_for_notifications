@@ -1,10 +1,6 @@
 from pathlib import Path
 
-from pydantic_settings import (
-    BaseSettings,
-    PydanticBaseSettingsSource,
-    YamlConfigSettingsSource,
-)
+from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, YamlConfigSettingsSource
 
 from app.const import ASSETS_SOURCE_DIR
 

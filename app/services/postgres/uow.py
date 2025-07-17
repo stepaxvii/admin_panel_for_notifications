@@ -23,3 +23,15 @@ class UoW:
         for instance in instances:
             await self.session.delete(instance)
         await self.session.commit()
+
+    @property
+    def notifications(self):
+        from app.services.postgres.repositories.notifications import NotificationsRepository
+
+        return NotificationsRepository(self.session)
+
+    @property
+    def users(self):
+        from app.services.postgres.repositories.users import UsersRepository
+
+        return UsersRepository(self.session)

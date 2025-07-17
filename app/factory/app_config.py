@@ -14,10 +14,10 @@ from app.models.config.env import (
 # noinspection PyArgumentList
 def create_app_config() -> AppConfig:
     return AppConfig(
-        telegram=TelegramConfig(),
-        postgres=PostgresConfig(),
-        sql_alchemy=SQLAlchemyConfig(),
-        redis=RedisConfig(),
-        server=ServerConfig(),
-        common=CommonConfig(),
+        telegram=TelegramConfig(),  # type: ignore
+        postgres=PostgresConfig(),  # type: ignore
+        sql_alchemy=SQLAlchemyConfig(),  # type: ignore
+        redis=RedisConfig(),  # type: ignore
+        server=ServerConfig(),  # type: ignore
+        common=CommonConfig(),  # type: ignore
     )

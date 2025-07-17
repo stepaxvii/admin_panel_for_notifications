@@ -1,7 +1,7 @@
 from pydantic import SecretStr
 from sqlalchemy import URL
 
-from .base import EnvSettings
+from app.models.config.env.base import EnvSettings
 
 
 class PostgresConfig(EnvSettings, env_prefix="POSTGRES_"):

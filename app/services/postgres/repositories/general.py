@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .base import BaseRepository
-from .users import UsersRepository
+from app.services.postgres.repositories.base import BaseRepository
+from app.services.postgres.repositories.users import UsersRepository
 
 
 class Repository(BaseRepository):

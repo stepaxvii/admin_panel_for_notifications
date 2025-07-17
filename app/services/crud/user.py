@@ -43,6 +43,11 @@ class UserService(CrudService):
                 return None
             return user.dto()
 
+    async def list_all(self) -> list[UserDto]:
+        async with SQLSessionContext(session_pool=self.session_pool) as (repository, uow):
+            users = await uow.users.list_all()
+            return [user.dto() for user in users]
+
     async def count(self) -> int:
         async with SQLSessionContext(session_pool=self.session_pool) as (repository, uow):
             return await repository.users.count()

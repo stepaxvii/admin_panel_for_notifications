@@ -4,8 +4,8 @@ from typing import Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from .repositories import Repository
-from .uow import UoW
+from app.services.postgres.repositories import Repository
+from app.services.postgres.uow import UoW
 
 
 class SQLSessionContext:

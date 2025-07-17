@@ -1,22 +1,42 @@
-# Builder image
-FROM python:3.12-slim AS builder
+FROM python:3.12-slim
 
-ENV PATH "/app/scripts:${PATH}"
-ENV PYTHONPATH "${PYTHONPATH}:/app"
-ENV PYTHONUNBUFFERED=1 PIP_DISABLE_PIP_VERSION_CHECK=1
-ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
+# Установка системных зависимостей
+RUN apt-get update && apt-get install -y \
+    gcc \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
+# Установка uv
+RUN pip install --upgrade pip && \
+    pip install uv
+
+# Создание пользователя
+RUN useradd --create-home --shell /bin/bash app
+
+# Установка рабочей директории
 WORKDIR /app
-ADD . /app
 
-# Install project dependencies
-COPY --from=ghcr.io/astral-sh/uv:0.5.7 /uv /uvx /bin/
-RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --no-install-project --no-dev
+# Копирование файлов проекта
+COPY pyproject.toml .
+COPY requirements-dev.txt .
 
-# Final image
-FROM builder AS final
-COPY --from=builder --chown=app:app /app /app
-ENV PATH="/app/.venv/bin:$PATH"
-RUN chmod +x scripts/*
+# Установка зависимостей проекта через uv (с флагом --system)
+RUN uv pip install --system .
+
+# Копирование остальных файлов
+COPY . .
+
+# Смена владельца файлов
+RUN chown -R app:app /app
+
+# Создание файла для логирования
+RUN touch /app/logs.log
+
+# Переключение на пользователя app
+USER app
+
+# Открытие порта
+EXPOSE 8080
+
+# Команда по умолчанию
+CMD ["python", "-m", "app"]

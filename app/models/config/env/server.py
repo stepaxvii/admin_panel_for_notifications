@@ -1,4 +1,4 @@
-from .base import EnvSettings
+from app.models.config.env.base import EnvSettings
 
 
 class ServerConfig(EnvSettings, env_prefix="SERVER_"):

@@ -22,3 +22,6 @@ class UsersRepository(BaseRepository):
 
     async def count(self) -> int:
         return cast(int, await self.session.scalar(select(count(User.id))))
+
+    async def list_all(self) -> list[User]:
+        return await self._get_many(User)

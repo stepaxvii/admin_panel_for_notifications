@@ -1,8 +1,7 @@
 from pydantic import SecretStr
 
+from app.models.config.env.base import EnvSettings
 from app.utils.custom_types import StringList
-
-from .base import EnvSettings
 
 
 class TelegramConfig(EnvSettings, env_prefix="TELEGRAM_"):

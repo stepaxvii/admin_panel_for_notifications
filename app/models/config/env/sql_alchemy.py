@@ -1,4 +1,4 @@
-from .base import EnvSettings
+from app.models.config.env.base import EnvSettings
 
 
 class SQLAlchemyConfig(EnvSettings, env_prefix="ALCHEMY_"):

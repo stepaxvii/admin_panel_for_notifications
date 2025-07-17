@@ -5,10 +5,9 @@ from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.dto.user import UserDto
+from app.models.sql.base import Base
+from app.models.sql.mixins import TimestampMixin
 from app.utils.custom_types import Int64
-
-from .base import Base
-from .mixins import TimestampMixin
 
 
 class User(Base, TimestampMixin):

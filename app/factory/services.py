@@ -6,9 +6,7 @@ from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.models.config import AppConfig
-from app.services.crud import (
-    UserService,
-)
+from app.services.crud import UserService
 from app.services.redis import RedisRepository
 
 

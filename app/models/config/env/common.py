@@ -1,4 +1,4 @@
-from .base import EnvSettings
+from app.models.config.env.base import EnvSettings
 
 
 class CommonConfig(EnvSettings, env_prefix="COMMON_"):

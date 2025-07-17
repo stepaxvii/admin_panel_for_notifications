@@ -1,0 +1,13 @@
+[flake8]
+max-line-length = 99
+extend-ignore = E203, W503
+exclude =
+    .git,
+    __pycache__,
+    .venv,
+    build,
+    dist,
+    migrations,
+    aiogram_bot_template.egg-info,
+    .ruff_cache,
+    .pytest_cache

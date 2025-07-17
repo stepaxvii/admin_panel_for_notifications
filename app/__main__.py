@@ -7,7 +7,7 @@ from app.utils.logging import setup_logger
 
 
 def main() -> None:
-    setup_logger()
+    setup_logger(log_file="logs.log")
     config: AppConfig = create_app_config()
     bot: Bot = create_bot(config=config)
     dispatcher: Dispatcher = create_dispatcher(config=config)

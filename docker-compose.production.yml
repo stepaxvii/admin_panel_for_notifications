@@ -1,0 +1,55 @@
+services:
+   redis:
+      image: redis:7-alpine
+      restart: always
+      env_file: .env
+      ports:
+         - "${REDIS_PORT}:6379"
+      expose:
+         - "${REDIS_PORT}"
+      volumes:
+         - redis-data:/data
+      command: [ "--requirepass", "${REDIS_PASSWORD}" ]
+
+   postgres:
+      image: postgres:16-alpine
+      restart: always
+      env_file: .env
+      environment:
+         POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+         POSTGRES_USER: ${POSTGRES_USER}
+         POSTGRES_DB: ${POSTGRES_DB}
+         PGDATA: ${POSTGRES_DATA}
+      ports:
+         - "5434:5432"
+      expose:
+         - "5432"
+      volumes:
+         - postgres-data:/var/lib/postgresql/data
+
+   admin:
+      image: stepaxvii/admin-panel-notifications:latest
+      restart: always
+      env_file: .env
+      depends_on:
+         - redis
+         - postgres
+      ports:
+         - "8081:8081"
+      command: ["python", "-m", "app"]
+   
+   celery_worker:
+      image: stepaxvii/admin-panel-notifications:latest
+      restart: always
+      env_file: .env
+      depends_on:
+        - redis
+        - postgres
+      command: >
+         python -m celery -A app.celery.celery_worker.celery_app worker --loglevel=info --pool=solo -Q notifications --logfile=logs.log
+      volumes:
+        - ./logs.log:/app/logs.log
+
+volumes:
+   redis-data:
+   postgres-data:

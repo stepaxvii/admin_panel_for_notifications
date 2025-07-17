@@ -28,3 +28,6 @@ dist/
 site/
 *.egg-info/
 *.egg
+
+# Logs
+logs.log
