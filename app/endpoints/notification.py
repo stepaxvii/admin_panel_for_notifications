@@ -35,6 +35,13 @@ async def list_notifications(service: NotificationService = Depends(get_notifica
     return await service.list_all()
 
 
+@router.get("/{notification_id}", status_code=status.HTTP_200_OK)
+async def get_notification(
+    notification_id: int, service: NotificationService = Depends(get_notification_service)
+):
+    return await service.get(notification_id)
+
+
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_notification(
     notification: NotificationCreate,
