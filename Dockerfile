@@ -29,8 +29,8 @@ COPY . .
 # Смена владельца файлов
 RUN chown -R app:app /app
 
-# Создание файла для логирования
-RUN touch /app/logs.log
+# Создание папки для логов и установка прав
+RUN mkdir -p /app/logs && chmod 777 /app/logs
 
 # Переключение на пользователя app
 USER app

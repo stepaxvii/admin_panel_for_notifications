@@ -6,7 +6,7 @@ def disable_aiogram_logs() -> None:
         logging.getLogger(name).setLevel(logging.WARNING)
 
 
-def setup_logger(level: int = logging.INFO, log_file: str = "logs.log") -> None:
+def setup_logger(level: int = logging.INFO, log_file: str = "logs/logs.log") -> None:
     logging.basicConfig(
         format="%(asctime)s %(levelname)s | %(name)s: %(message)s",
         datefmt="[%H:%M:%S]",

@@ -37,6 +37,8 @@ services:
       ports:
          - "8081:8081"
       command: ["python", "-m", "app"]
+      volumes:
+         - logs-data:/app/logs
    
    celery_worker:
       image: stepaxvii/admin-panel-notifications:latest
@@ -47,7 +49,10 @@ services:
         - postgres
       command: >
          python -m celery -A app.celery.celery_worker.celery_app worker --loglevel=info --pool=solo -Q notifications --logfile=logs.log
+      volumes:
+         - logs-data:/app/logs
 
 volumes:
    redis-data:
    postgres-data:
+   logs-data:
