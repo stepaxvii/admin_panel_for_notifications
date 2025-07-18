@@ -47,8 +47,6 @@ services:
         - postgres
       command: >
          python -m celery -A app.celery.celery_worker.celery_app worker --loglevel=info --pool=solo -Q notifications --logfile=logs.log
-      volumes:
-        - ./logs.log:/app/logs.log
 
 volumes:
    redis-data:
