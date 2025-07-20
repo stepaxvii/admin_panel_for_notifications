@@ -62,7 +62,7 @@ class MessageHelper:
         if isinstance(self.update, Message):
             chat_id = chat_id or self.update.chat.id
             message_id = message_id or self.update.message_id
-            can_be_edited = self.update.from_user.id == self.bot.id  # type: ignore
+            can_be_edited = self.update.from_user.id == self.bot.id
         elif isinstance(self.update, CallbackQuery):
             if self.update.message is None:
                 raise RuntimeError("Message is unavailable.")

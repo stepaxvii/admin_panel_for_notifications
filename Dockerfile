@@ -18,7 +18,6 @@ WORKDIR /app
 
 # Копирование файлов проекта
 COPY pyproject.toml .
-# COPY requirements-dev.txt .
 
 # Установка зависимостей проекта через uv (с флагом --system)
 RUN uv pip install --system .
@@ -36,7 +35,7 @@ RUN mkdir -p /app/logs && chmod 777 /app/logs
 USER app
 
 # Открытие порта
-EXPOSE 8080
+EXPOSE 9000
 
 # Команда по умолчанию
 CMD ["python", "-m", "app"]
