@@ -25,3 +25,8 @@ dist/
 site/
 *.egg-info/
 *.egg
+
+# Logs
+logs.log
+logs.log/
+logs/

@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, status
+from functools import lru_cache
 
 from app.factory.app_config import create_app_config
 from app.factory.redis import create_redis
@@ -7,16 +8,21 @@ from app.models.dto.notification import NotificationCreate, NotificationUpdate
 from app.services.crud.notification import NotificationService
 
 
+@lru_cache()
+def get_config():
+    return create_app_config()
+
+
+session_pool = create_session_pool(config=get_config())
+redis = create_redis(config=get_config())
+
+
 def get_session_pool():
-    return create_session_pool(config=create_app_config())
+    return session_pool
 
 
 def get_redis():
-    return create_redis(config=create_app_config())
-
-
-def get_config():
-    return create_app_config()
+    return redis
 
 
 def get_notification_service(

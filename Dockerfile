@@ -18,7 +18,7 @@ WORKDIR /app
 
 # Копирование файлов проекта
 COPY pyproject.toml .
-COPY requirements-dev.txt .
+# COPY requirements-dev.txt .
 
 # Установка зависимостей проекта через uv (с флагом --system)
 RUN uv pip install --system .
