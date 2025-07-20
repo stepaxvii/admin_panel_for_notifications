@@ -32,7 +32,9 @@ class NotificationActions:
         logger.info(f"Sending notification(s) to {len(users_ids)} users.")
         from app.celery.celery_tasks.notification import send_mass_message
         for notification in notifications:
-            logger.info(f"Sending notification {notification.id} with text '{notification.text}' to users: {users_ids}")
+            logger.info(
+                f"Sending {notification.id} with text '{notification.text}' to users: {users_ids}"
+            )
             send_mass_message.delay(notification.text, users_ids, notification.id)
         return f"Sent notification {notification_ids}."
 
@@ -57,10 +59,16 @@ class NotificationActions:
                         <strong>Text:</strong><br>
                         {notification.text}
                     </div>
-                    {f'<div style="margin: 10px 0;"><strong>Comment:</strong><br>{notification.comment}</div>' if notification.comment else ''}
+                    {f'<div style="margin: 10px 0;"><strong>Comment:</strong><br>{
+                        notification.comment
+                    }</div>' if notification.comment else ''}
                     <div style="margin: 10px 0;">
                         <strong>Status:</strong> {notification.status or 'pending'}<br>
-                        <strong>Create at:</strong> {notification.created_at.strftime('%d.%m.%Y %H:%M:%S') if notification.created_at else 'N/A'}
+                        <strong>Create at:</strong> {
+                            notification.created_at.strftime(
+                                '%d.%m.%Y %H:%M:%S'
+                            ) if notification.created_at else 'N/A'
+                        }
                     </div>
                 </div>
                 """
