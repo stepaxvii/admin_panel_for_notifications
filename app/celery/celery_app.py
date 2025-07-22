@@ -2,7 +2,8 @@ from celery import Celery
 
 from app.models.config.env import RedisConfig
 
-redis_config = RedisConfig()  # type: ignore
+
+redis_config = RedisConfig()
 redis_url = redis_config.build_url()
 
 celery_app = Celery(
