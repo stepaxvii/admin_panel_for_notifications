@@ -26,11 +26,34 @@ async def test_client(test_app):
         yield ac
 
 
-@pytest_asyncio.fixture(autouse=True)
-async def cleanup_notifications(test_client):
-    yield
-    # Очистка уведомлений после каждого теста
-    response = await test_client.get("/notifications/")
-    if response.status_code == 200:
-        for notification in response.json():
-            await test_client.delete(f"/notifications/{notification['id']}")
+@pytest.fixture(autouse=True)
+def mock_external_services(mocker):
+    mock_redis = AsyncMock()
+    mocker.patch("app.factory.redis.create_redis", return_value=mock_redis)
+    mock_session_pool = AsyncMock()
+    mocker.patch("app.factory.session_pool.create_session_pool", return_value=mock_session_pool)
+    mocker.patch(
+        "app.services.crud.notification.NotificationService.list_all",
+        new_callable=AsyncMock,
+        return_value=[{"id": 1, "text": "Test create", "comment": "Test create"}]
+    )
+    mocker.patch(
+        "app.services.crud.notification.NotificationService.create",
+        new_callable=AsyncMock,
+        return_value={"id": 1, "text": "Test create", "comment": "Test create"}
+    )
+    mocker.patch(
+        "app.services.crud.notification.NotificationService.get",
+        new_callable=AsyncMock,
+        return_value={"id": 1, "text": "Test create", "comment": "Test create"}
+    )
+    mocker.patch(
+        "app.services.crud.notification.NotificationService.update",
+        new_callable=AsyncMock,
+        return_value={"id": 1, "text": "Edited complite", "comment": "Test edit"}
+    )
+    mocker.patch(
+        "app.services.crud.notification.NotificationService.delete",
+        new_callable=AsyncMock,
+        return_value=None
+    )
