@@ -26,7 +26,7 @@ def send_mass_message(text: str, user_ids: list[int], notification_id: int):
     blocked = 0
     failed = 0
     try:
-        bot_token = TelegramConfig().bot_token.get_secret_value()  # type: ignore
+        bot_token = TelegramConfig().bot_token.get_secret_value()
     except Exception as e:
         logger.error(f"Error getting bot token: {e}")
         raise e

@@ -30,7 +30,7 @@ def handle_sigterm(*_: Any, app: FastAPI) -> None:
 
 
 def run_app(app: FastAPI, config: AppConfig) -> None:
-    server.HANDLED_SIGNALS = (signal.SIGINT,)  # type: ignore
+    server.HANDLED_SIGNALS = (signal.SIGINT,)
     signal.signal(signal.SIGTERM, partial(handle_sigterm, app=app))
     return uvicorn.run(
         app=app,
