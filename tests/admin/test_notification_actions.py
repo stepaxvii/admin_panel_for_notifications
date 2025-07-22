@@ -7,8 +7,6 @@ async def test_admin_can_create_notification(test_client):
         "/notifications/",
         json={"text": "Test create", "comment": "Test create"}
     )
-    notif_id = response.json()["id"]
-    await test_client.delete(f"/notifications/{notif_id}")
     assert response.status_code == 201
     data = response.json()
     assert data["text"] == "Test create"
@@ -25,7 +23,6 @@ async def test_admin_can_edit_notification(test_client):
         f"/notifications/{notif_id}",
         json={"text": "Edited complite"}
     )
-    await test_client.delete(f"/notifications/{notif_id}")
     assert response.status_code == 200
     assert response.json()["text"] == "Edited complite"
 
